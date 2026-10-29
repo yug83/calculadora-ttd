@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculadora TTD Colombia | UD, ID e impuesto a adicionar</title>
+<style>
+:root{--navy:#10213b;--blue:#1f5d8f;--light:#edf4fa;--pale:#f7f9fc;--orange:#e58a2b;--ink:#17263c;--muted:#617087;--line:#d7e1ec;--green:#176b4d;--red:#a23c32}
+*{box-sizing:border-box}body{margin:0;background:#f2f5f9;color:var(--ink);font:15px/1.5 "Segoe UI",Arial,sans-serif}
+header{background:linear-gradient(115deg,#10213b,#214f79);color:white;padding:30px max(20px,calc((100% - 1220px)/2));}
+.eyebrow{color:#ffbd72;text-transform:uppercase;letter-spacing:.12em;font-size:12px;font-weight:800}
+h1{margin:6px 0 8px;font-size:clamp(25px,4vw,38px);line-height:1.15}header p{margin:0;max-width:900px;color:#e3edf7}
+main{max-width:1220px;margin:22px auto;padding:0 18px 40px}
+.notice{background:#fff8e9;border:1px solid #f2d39c;border-left:5px solid var(--orange);padding:13px 16px;border-radius:10px;margin-bottom:18px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.panel{background:white;border:1px solid var(--line);border-radius:14px;padding:19px;box-shadow:0 5px 18px #203c5a0a;margin-bottom:18px}
+h2{font-size:20px;margin:0 0 5px;color:var(--navy)}.sub{color:var(--muted);margin:0 0 16px;font-size:13px}
+.formula{background:var(--light);border:1px solid #d4e4f3;border-radius:10px;padding:12px 14px;font-size:19px;font-weight:800;color:var(--navy);text-align:center;margin:12px 0}
+.field{display:grid;grid-template-columns:minmax(0,1fr) minmax(125px,42%);gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid #edf1f6}.field:last-child{border-bottom:0}
+label{font-weight:650}.hint{font-size:12px;color:var(--muted);display:block;font-weight:400}
+input,select{width:100%;border:1px solid #c8d5e3;border-radius:8px;padding:10px 11px;font:inherit;color:var(--ink);background:white}
+input:focus,select:focus{outline:2px solid #9cc7ed;border-color:var(--blue)}
+.money{text-align:right;font-variant-numeric:tabular-nums}
+.component{border:1px solid var(--line);border-radius:10px;margin:12px 0;overflow:hidden}
+.component-head{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#f3f7fb;padding:10px 12px;font-weight:750}
+.component-body{padding:0 12px}.component .field{grid-template-columns:minmax(0,1fr) minmax(125px,38%)}
+.partida-name{font-weight:750;color:var(--navy);border:1px solid transparent;background:transparent;padding:10px 0;border-radius:5px;min-width:0}.partida-name::placeholder{color:var(--navy);opacity:1}.partida-name:focus{border-color:#9cc7ed;background:#f8fbff;padding-left:8px}
+button{border:0;border-radius:8px;padding:9px 12px;font-weight:750;cursor:pointer;font:inherit}
+.btn-add{background:#e4eff9;color:#174d7a;font-size:13px}.btn-main{background:var(--orange);color:#241605;padding:12px 17px}.btn-secondary{background:#e9eef4;color:var(--navy)}
+.result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
+.metric{background:#f6f9fc;border:1px solid var(--line);border-radius:11px;padding:14px}.metric span{display:block;color:var(--muted);font-size:12px;font-weight:700}.metric strong{display:block;font-size:clamp(19px,2.5vw,28px);color:var(--navy);margin-top:4px;overflow-wrap:anywhere}
+.metric.highlight{background:#fff3dc;border-color:#f0cf8c}.metric.highlight strong{color:#8b4800}
+.status{border-radius:9px;padding:13px 15px;background:#eef7f2;border:1px solid #c7e6d4;color:#155a40;font-weight:650}.status.warn{background:#fff5e7;border-color:#f1d5a9;color:#7c4a08}.status.error{background:#fff0ef;border-color:#efc3bf;color:#8b2e27}
+.calc-lines{background:#f7f9fc;border-radius:10px;padding:13px 15px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px}
+.small{font-size:12px;color:var(--muted)}.actions{display:flex;flex-wrap:wrap;gap:9px;margin:14px 0}.section-label{font-size:12px;color:var(--blue);font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin:0 0 7px}
+details{border-top:1px solid var(--line);padding:12px 0}summary{font-weight:750;cursor:pointer;color:var(--navy)}
+footer{font-size:12px;color:var(--muted);padding:8px 2px}a{color:#1f5d8f}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.result-grid{grid-template-columns:1fr 1fr}.field{grid-template-columns:1fr minmax(120px,42%)}}
+@media(max-width:480px){.result-grid{grid-template-columns:1fr}.panel{padding:14px}.component .field{grid-template-columns:1fr 42%}}
+@media print{body{background:white}.panel{box-shadow:none;break-inside:avoid}header{padding:20px}.actions,button{display:none}main{max-width:none}.grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">Herramienta de trabajo · Colombia</div>
+  <h1>Calculadora de Tasa de Tributación Depurada (TTD)</h1>
+  <p>Construye la Utilidad Depurada (UD) y el Impuesto Depurado (ID) por componentes, revisa la tasa y estima el impuesto a adicionar con base en los datos ingresados.</p>
+</header>
+<main>
+  <div class="notice"><strong>Importante:</strong> herramienta de apoyo y estimación, no reemplaza la revisión tributaria. Ingresa solo partidas que correspondan a las definiciones legales y al año gravable aplicable. La regla general de referencia es el parágrafo 6 del artículo 240 del Estatuto Tributario; hay exclusiones, reglas para estados financieros consolidados y otros supuestos que pueden modificar la aplicación.</div>
+  <div class="grid">
+    <section class="panel">
+      <h2>1. Cálculo de la Utilidad Depurada (UD)</h2>
+      <p class="sub">Ingresa los valores de cada componente. Puedes registrar varias partidas por concepto; el sistema suma cada grupo automáticamente.</p>
+      <div class="formula">UD = UC + DPARL − INCRNGO − VIMPP − VNGO − RE − C</div>
+      <div class="field"><label for="uc">UC · Utilidad contable o financiera antes de impuestos<span class="hint">Valor inicial de los estados financieros antes del impuesto a las ganancias.</span></label><input id="uc" class="money" type="number" step="any" value="0"></div>
+      <div id="udComponents"></div>
+      <div class="result-grid" style="grid-template-columns:1fr">
+        <div class="metric"><span>UTILIDAD DEPURADA CALCULADA (UD)</span><strong id="udResult">$ 0</strong></div>
+      </div>
+      <div id="udBreakdown" class="calc-lines">Ingresa los valores para ver el desarrollo de la fórmula.</div>
+    </section>
+    <section class="panel">
+      <h2>2. Cálculo del Impuesto Depurado (ID)</h2>
+      <p class="sub">Registra el impuesto neto de renta, los descuentos/créditos admitidos y el impuesto por rentas pasivas de entidades controladas del exterior.</p>
+      <div class="formula">ID = INR + DTC − IRP</div>
+      <div class="field"><label for="inr">INR · Impuesto neto de renta<span class="hint">Valor determinado conforme a la declaración y reglas aplicables.</span></label><input id="inr" class="money" type="number" step="any" value="0"></div>
+      <div id="dtcComponents"></div>
+      <div class="field"><label for="irp">IRP · Impuesto sobre rentas pasivas de ECE<span class="hint">Según la definición legal aplicable; no ingresar aquí la renta pasiva, sino el impuesto calculado.</span></label><input id="irp" class="money" type="number" step="any" value="0"></div>
+      <div class="result-grid" style="grid-template-columns:1fr">
+        <div class="metric"><span>IMPUESTO DEPURADO CALCULADO (ID)</span><strong id="idResult">$ 0</strong></div>
+      </div>
+      <div id="idBreakdown" class="calc-lines">Ingresa los valores para ver el desarrollo de la fórmula.</div>
+    </section>
+  </div>
+  <section class="panel">
+    <h2>3. Resultado de la TTD y cálculo del impuesto a adicionar</h2>
+    <p class="sub">La calculadora utiliza el 15 % como tasa mínima general de referencia. Confirma previamente que el contribuyente está sujeto a esta regla y no aplica una exclusión legal.</p>
+    <div class="grid">
+      <div>
+        <div class="field"><label for="rate">Tasa mínima de referencia (%)<span class="hint">Se inicia en 15 %. Modifícala solo si una norma aplicable lo exige y valida la regla correspondiente.</span></label><input id="rate" type="number" min="0" max="100" step="0.01" value="15"></div>
+        <div class="field"><label for="precision">Decimales para mostrar la TTD</label><select id="precision"><option value="2">2 decimales</option><option value="1">1 decimal</option><option value="3">3 decimales</option></select></div>
+        <div class="actions"><button class="btn-main" id="recalc">Actualizar cálculo</button><button class="btn-secondary" id="reset">Limpiar datos</button><button class="btn-secondary" id="print">Imprimir / guardar PDF</button></div>
+      </div>
+      <div>
+        <div class="result-grid">
+          <div class="metric"><span>TTD = ID ÷ UD</span><strong id="ttdResult">—</strong></div>
+          <div class="metric"><span>Impuesto de referencia = UD × tasa</span><strong id="targetResult">$ 0</strong></div>
+          <div class="metric highlight"><span>IMPUESTO A ADICIONAR ESTIMADO</span><strong id="iaResult">$ 0</strong></div>
+        </div>
+        <div id="status" class="status">Ingresa los datos para calcular el resultado.</div>
+      </div>
+    </div>
+    <h3 style="color:var(--navy);margin-bottom:8px">Desarrollo numérico</h3>
+    <div id="finalBreakdown" class="calc-lines">La operación detallada aparecerá aquí.</div>
+    <details>
+      <summary>¿Cómo se interpreta el impuesto a adicionar?</summary>
+      <p>Como estimación simple para un contribuyente individual sujeto a la regla general, se calcula la diferencia positiva entre UD multiplicada por la tasa mínima y el ID: IA estimado = máximo entre cero y (UD × tasa mínima − ID). El valor legal a adicionar debe determinarse con la fórmula y las reglas completas del artículo 240, parágrafo 6, incluyendo las reglas especiales que correspondan al contribuyente.</p>
+    </details>
+    <details>
+      <summary>Definiciones de los componentes de la UD</summary>
+      <ul>
+        <li><strong>UC:</strong> utilidad contable o financiera antes de impuestos.</li>
+        <li><strong>DPARL:</strong> diferencias permanentes consagradas en la ley que aumentan la renta líquida.</li>
+        <li><strong>INCRNGO:</strong> ingresos no constitutivos de renta ni ganancia ocasional que afectan la utilidad contable o financiera.</li>
+        <li><strong>VIMPP:</strong> valor del ingreso por método de participación patrimonial del periodo.</li>
+        <li><strong>VNGO:</strong> valor neto de ingresos por ganancias ocasionales que afectan la utilidad contable o financiera.</li>
+        <li><strong>RE:</strong> rentas exentas por aplicación de tratados para evitar la doble imposición, cuando corresponda según la norma.</li>
+        <li><strong>C:</strong> compensaciones de pérdidas fiscales en los términos y límites previstos en la norma aplicable.</li>
+      </ul>
+      <p class="small">La clasificación de una partida no se determina solo por su nombre contable: verifica la definición legal, el periodo, los soportes y la interpretación administrativa/judicial vigente.</p>
+    </details>
+    <details>
+      <summary>Definiciones de los componentes del ID</summary>
+      <ul>
+        <li><strong>INR:</strong> impuesto neto de renta.</li>
+        <li><strong>DTC:</strong> descuentos o créditos tributarios por aplicación de tratados para evitar la doble imposición y el previsto en el artículo 254 del Estatuto Tributario, según corresponda.</li>
+        <li><strong>IRP:</strong> impuesto sobre la renta por rentas pasivas provenientes de entidades controladas del exterior, calculado conforme a la regla legal.</li>
+      </ul>
+    </details>
+  </section>
+  <section class="panel">
+    <h2>4. Control y exportación</h2>
+    <p class="sub">Puedes descargar un resumen de los importes ingresados y los resultados calculados en formato CSV para documentar la revisión.</p>
+    <div class="actions"><button class="btn-secondary" id="csv">Descargar resumen CSV</button></div>
+    <p class="small">Los datos se procesan localmente en este navegador; este archivo no los envía a un servidor.</p>
+  </section>
+  <footer>
+    Referencia normativa inicial: Estatuto Tributario, artículo 240, parágrafo 6; Ley 2277 de 2022, artículo 10; e instructivo DIAN del Formulario 110 del año gravable correspondiente. Consulta las fuentes oficiales antes de usar el resultado en una declaración.
+    <br><br>Uso responsable: no es un software de cumplimiento certificado. No contempla automáticamente todas las exclusiones, consolidaciones, reglas especiales ni validaciones de la declaración.
+  </footer>
+</main>
+<script>
+const udDefs = [
+ {id:"dparl",label:"DPARL · Diferencias permanentes que aumentan la renta líquida",sign:1,hint:"Se suma a la UC; registrar únicamente diferencias permanentes legalmente comprendidas."},
+ {id:"incrngo",label:"INCRNGO · Ingresos no constitutivos de renta ni ganancia ocasional",sign:-1,hint:"Se resta en la fórmula, si afecta la utilidad contable o financiera."},
+ {id:"vimpp",label:"VIMPP · Ingreso por método de participación patrimonial",sign:-1,hint:"Valor del periodo que corresponda según la definición legal."},
+ {id:"vngo",label:"VNGO · Valor neto de ingresos por ganancias ocasionales",sign:-1,hint:"Registrar el valor neto aplicable, no el bruto sin revisar su definición."},
+ {id:"re",label:"RE · Rentas exentas incluidas en la definición legal",sign:-1,hint:"No ingresar toda renta exenta sin comprobar que corresponde al concepto legal."},
+ {id:"c",label:"C · Compensaciones de pérdidas fiscales admitidas para esta fórmula",sign:-1,hint:"Aplican las condiciones, límites y reglas legales; no confundir automáticamente con la pérdida contable."}
+];
+const dtcDef={id:"dtc",label:"DTC · Descuentos o créditos tributarios admisibles",sign:1,hint:"Tratados para evitar doble imposición y artículo 254 E.T., según proceda."};
+const itemTotals={};
+function money(n){if(!Number.isFinite(n))n=0;return new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:2}).format(n)}
+function number(n){return new Intl.NumberFormat('es-CO',{maximumFractionDigits:2}).format(n)}
+function createComponent(def, containerId, multi=true){
+ const container=document.getElementById(containerId);
+ const box=document.createElement('div');box.className='component';box.dataset.component=def.id;
+ const head=document.createElement('div');head.className='component-head';
+ const title=document.createElement('span');title.textContent=def.label;
+ head.appendChild(title);
+ if(multi){const btn=document.createElement('button');btn.className='btn-add';btn.type='button';btn.textContent='+ Agregar partida';btn.onclick=()=>addLine(def,body);head.appendChild(btn)}
+ box.appendChild(head);
+ const body=document.createElement('div');body.className='component-body';
+ const hint=document.createElement('p');hint.className='small';hint.textContent=def.hint;body.appendChild(hint);
+ box.appendChild(body);container.appendChild(box);
+ addLine(def,body);
+}
+function addLine(def,body){
+ const row=document.createElement('div');row.className='field';
+ const desc=document.createElement('input');desc.type='text';desc.className='partida-name';desc.placeholder='Nombre de la partida…';desc.setAttribute('aria-label','Nombre de la partida');
+ const wrap=document.createElement('div');wrap.style.display='grid';wrap.style.gridTemplateColumns='1fr auto';wrap.style.gap='5px';
+ const val=document.createElement('input');val.type='number';val.step='any';val.value='0';val.className='money amount';val.dataset.component=def.id;val.setAttribute('aria-label',def.label+' valor');val.addEventListener('input',calculate);val.addEventListener('change',calculate);desc.addEventListener('input',calculate);
+ wrap.appendChild(val);
+ if(body.querySelectorAll('.field').length>0){const rm=document.createElement('button');rm.type='button';rm.className='btn-secondary';rm.textContent='×';rm.title='Eliminar partida';rm.onclick=()=>{row.remove();calculate()};wrap.appendChild(rm)}
+ row.appendChild(desc);row.appendChild(wrap);row.dataset.sign=def.sign;row.dataset.id=def.id;
+ body.appendChild(row);
+}
+function sumComponent(id){return [...document.querySelectorAll('.amount[data-component="'+id+'"]')].reduce((s,e)=>s+(parseFloat(e.value)||0),0)}
+function componentLabel(id){return udDefs.find(d=>d.id===id)?.label.split(' · ')[0]||id.toUpperCase()}
+function calculate(){
+ const uc=parseFloat(document.getElementById('uc').value)||0;
+ const udTerms=udDefs.map(d=>({id:d.id,sign:d.sign,total:sumComponent(d.id)}));
+ const ud=uc+udTerms.reduce((s,t)=>s+t.sign*t.total,0);
+ const inr=parseFloat(document.getElementById('inr').value)||0;
+ const dtc=sumComponent('dtc');
+ const irp=parseFloat(document.getElementById('irp').value)||0;
+ const id=inr+dtc-irp;
+ const rate=(parseFloat(document.getElementById('rate').value)||0)/100;
+ const precision=parseInt(document.getElementById('precision').value)||2;
+ const validUD=Number.isFinite(ud) && ud>0;
+ const ttd=validUD?(id/ud)*100:null;
+ const target=validUD?ud*rate:null;
+ const ia=validUD?Math.max(0,target-id):null;
+ document.getElementById('udResult').textContent=money(ud);
+ document.getElementById('idResult').textContent=money(id);
+ document.getElementById('ttdResult').textContent=validUD?ttd.toLocaleString('es-CO',{minimumFractionDigits:precision,maximumFractionDigits:precision})+' %':'No calculable';
+ document.getElementById('targetResult').textContent=validUD?money(target):'—';
+ document.getElementById('iaResult').textContent=validUD?money(ia):'No calculable';
+ const udLines=[`UD = UC + DPARL − INCRNGO − VIMPP − VNGO − RE − C`,`UD = ${number(uc)}`,...udTerms.map(t=>`${t.sign>0?'+':'−'} ${componentLabel(t.id)}: ${number(t.total)}`),`UD = ${number(ud)}`];
+ document.getElementById('udBreakdown').textContent=udLines.join('\n');
+ document.getElementById('idBreakdown').textContent=[`ID = INR + DTC − IRP`,`ID = ${number(inr)} + ${number(dtc)} − ${number(irp)}`,`ID = ${number(id)}`].join('\n');
+ let msg='', cls='status';
+ if(!validUD){msg='La UD es igual o inferior a cero. No se calcula una TTD ordinaria ni un adicional con esta operación simple; verifica la regla legal aplicable y, si hay consolidación, la sumatoria correspondiente.';cls+=' warn'}
+ else if(id<0){msg='El ID calculado es negativo. Revisa los signos y la procedencia de los componentes ingresados antes de interpretar el resultado.';cls+=' error'}
+ else if(ttd<rate*100){msg=`La TTD calculada es inferior a ${number(rate*100)} %. El impuesto a adicionar estimado por la diferencia simple es ${money(ia)}. Verifica reglas especiales y exclusiones antes de usarlo.`;cls+=' warn'}
+ else{msg=`La TTD calculada es igual o superior a ${number(rate*100)} %. Con la fórmula simple ingresada, el impuesto a adicionar estimado es ${money(ia)}.`}
+ const status=document.getElementById('status');status.className=cls;status.textContent=msg;
+ document.getElementById('finalBreakdown').textContent=validUD?
+ [`TTD = ID ÷ UD × 100`,`TTD = ${number(id)} ÷ ${number(ud)} × 100 = ${ttd.toLocaleString('es-CO',{minimumFractionDigits:precision,maximumFractionDigits:precision})} %`,`Impuesto de referencia = UD × tasa mínima`,`= ${number(ud)} × ${number(rate*100)} % = ${number(target)}`,`IA estimado = máximo entre 0 y (UD × tasa mínima − ID)`,`= máximo entre 0 y (${number(target)} − ${number(id)})`,`= ${number(ia)}\n`,`Resultado orientativo: confirmar elegibilidad, consolidación y demás reglas legales aplicables.`].join('\n'):
+ [`UD = ${number(ud)}`,`ID = ${number(id)}`,`No se calcula TTD ni IA con esta fórmula simple porque la UD no es positiva.`,`Revisar la regla de aplicación prevista en el parágrafo 6 del artículo 240 E.T.`].join('\n');
+ window.lastCalc={uc,udTerms,ud,inr,dtc,irp,id,rate,ttd,target,ia};
+}
+function resetAll(){document.getElementById('uc').value=0;document.getElementById('inr').value=0;document.getElementById('irp').value=0;document.getElementById('rate').value=15;document.getElementById('precision').value=2;document.querySelectorAll('.component-body').forEach(body=>{const rows=[...body.querySelectorAll('.field')];rows.forEach((row,i)=>{if(i===0){const desc=row.querySelector('input[type=text]');const val=row.querySelector('input.amount');if(desc)desc.value='';if(val)val.value=0}else{row.remove()}})});calculate()}
+function csvDownload(){
+ calculate();const c=window.lastCalc;const rows=[['Concepto','Valor COP'],['UC',c.uc],...c.udTerms.map(t=>[componentLabel(t.id),t.total]),['UD',c.ud],['INR',c.inr],['DTC',c.dtc],['IRP',c.irp],['ID',c.id],['Tasa mínima (%)',c.rate*100],['TTD (%)',c.ttd??'No calculable'],['Impuesto de referencia',c.target??'No calculable'],['Impuesto a adicionar estimado',c.ia??'No calculable']];
+ const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\r\n');
+ const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='calculo_TTD_resumen.csv';a.click();URL.revokeObjectURL(url)
+}
+udDefs.forEach(d=>createComponent(d,'udComponents',true));
+createComponent(dtcDef,'dtcComponents',true);
+['uc','inr','irp','rate','precision'].forEach(id=>{document.getElementById(id).addEventListener('input',calculate);document.getElementById(id).addEventListener('change',calculate)});document.addEventListener('input',e=>{if(e.target.matches('.amount'))calculate()});
+document.getElementById('recalc').onclick=calculate;document.getElementById('reset').onclick=resetAll;document.getElementById('print').onclick=()=>window.print();document.getElementById('csv').onclick=csvDownload;
+calculate();
+</script>
+</body>
+</html>
